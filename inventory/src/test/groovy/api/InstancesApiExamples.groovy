@@ -1,6 +1,7 @@
 package api
 
 import api.support.ApiRoot
+import api.support.InstanceApiClient
 import api.support.Preparation
 import com.github.jsonldjava.core.DocumentLoader
 import com.github.jsonldjava.core.JsonLdOptions
@@ -161,14 +162,6 @@ class InstancesApiExamples extends Specification {
     then:
       assert response.status == 404
   }
-  
-  private def createInstance(JsonObject newInstanceRequest) {
-    def (postResponse, body) = client.post(
-      new URL("${ApiRoot.inventory()}/instances"),
-      Json.encodePrettily(newInstanceRequest))
-
-    assert postResponse.status == 201
-  }
 
   private void hasCollectionProperties(instances) {
 
@@ -210,6 +203,10 @@ class InstancesApiExamples extends Specification {
 
   private static String LinkedDataValue(List<Object> expanded, String field) {
     expanded[0][field][0]?."@value"
+  }
+
+  private def createInstance(JsonObject newInstanceRequest) {
+    InstanceApiClient.createInstance(client, newInstanceRequest)
   }
 
   private void selfLinkShouldBeReachable(instance) {
