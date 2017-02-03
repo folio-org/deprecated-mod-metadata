@@ -46,8 +46,9 @@ class ItemApiExamples extends Specification {
       assert getResponse.status == 200
 
       assert createdItem.id != null
-      assert createdItem.title == "Long Way to a Small Angry Planet"
       assert createdItem.instanceId == createdInstance.id
+      assert createdItem.title == "Long Way to a Small Angry Planet"
+      assert createdItem.publicationDate == "2015-08-13"
       assert createdItem.barcode == "645398607547"
 
       selfLinkRespectsWayResourceWasReached(createdItem)
@@ -154,7 +155,10 @@ class ItemApiExamples extends Specification {
 
       assert items.size() == 1
 
-      assert items[0].title == "Long Way to a Small Angry Planet"
+    def firstItem = items[0]
+
+    assert firstItem.title == "Long Way to a Small Angry Planet"
+    assert firstItem.publicationDate == "2015-08-13"
 
       items.each {
         selfLinkRespectsWayResourceWasReached(it)
@@ -178,7 +182,7 @@ class ItemApiExamples extends Specification {
 
     assert response.status == 200
   }
-  
+
   private def createInstance(JsonObject newInstanceRequest) {
     InstanceApiClient.createInstance(client, newInstanceRequest)
   }

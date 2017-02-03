@@ -5,8 +5,10 @@ import io.vertx.core.json.JsonObject
 import io.vertx.groovy.ext.web.Router
 import io.vertx.groovy.ext.web.RoutingContext
 import io.vertx.groovy.ext.web.handler.BodyHandler
+import org.folio.inventory.domain.Instance
 import org.folio.inventory.domain.Item
 import org.folio.inventory.storage.Storage
+import org.folio.metadata.common.WaitForAllFutures
 import org.folio.metadata.common.WebContext
 import org.folio.metadata.common.api.request.PagingParameters
 import org.folio.metadata.common.api.request.VertxBodyParser
@@ -43,15 +45,35 @@ class Items {
     if(search == null) {
       storage.getItemCollection(context).findAll(
         new PagingParameters(limit, offset), {
-        JsonResponse.success(routingContext.response(),
-          toRepresentation(it, context))
+
+        def waitForAllInstances = new WaitForAllFutures<Instance>()
+
+        it.each { item ->
+          storage.getInstanceCollection(context).findById(item.instanceId,
+            waitForAllInstances.notifyComplete())
+        }
+
+        waitForAllInstances.thenAccept({ instances ->
+          JsonResponse.success(routingContext.response(),
+            toRepresentation(it, instances, context))
+        })
       })
     }
     else {
       storage.getItemCollection(context).findByCql(search,
         new PagingParameters(limit, offset), {
-        JsonResponse.success(routingContext.response(),
-          toRepresentation(it, context))
+          def waitForAllInstances = new WaitForAllFutures<Instance>()
+
+          it.each { item ->
+            storage.getInstanceCollection(context).findById(item.instanceId,
+              waitForAllInstances.notifyComplete())
+          }
+
+          waitForAllInstances.thenAccept({ instances ->
+            println("Got all instances")
+            JsonResponse.success(routingContext.response(),
+              toRepresentation(it, instances, context))
+          })
       })
     }
   }
@@ -85,8 +107,11 @@ class Items {
       routingContext.request().getParam("id"),
       {
         if(it != null) {
-          JsonResponse.success(routingContext.response(),
-            toRepresentation(it, context))
+          storage.getInstanceCollection(context).findById(it.instanceId,
+            { instance -> JsonResponse.success(routingContext.response(),
+              toRepresentation(it, instance, context))
+            }
+          )
         }
         else {
           ClientErrorResponse.notFound(routingContext.response())
@@ -98,13 +123,17 @@ class Items {
     "/inventory/items"
   }
 
-  private JsonObject toRepresentation(List<Item> items, WebContext context) {
+  private JsonObject toRepresentation(List<Item> items,
+                                      List<Instances> instances,
+                                      WebContext context) {
+
     def representation = new JsonObject()
 
     def results = new JsonArray()
 
-    items.each {
-      results.add(toRepresentation(it, context))
+    items.each { item ->
+      results.add(toRepresentation(item,
+        instances.find({ it.id == item.instanceId }), context))
     }
 
     representation.put("items", results)
@@ -112,12 +141,15 @@ class Items {
     representation
   }
 
-  private JsonObject toRepresentation(Item item, WebContext context) {
+  private JsonObject toRepresentation(Item item, Instance instance,
+                                      WebContext context) {
+
     def representation = new JsonObject()
     representation.put("id", item.id)
     representation.put("instanceId", item.instanceId)
     representation.put("title", item.title)
     representation.put("barcode", item.barcode)
+    representation.put("publicationDate", instance.publicationDate)
 
     representation.put('links',
       ['self': context.absoluteUrl(

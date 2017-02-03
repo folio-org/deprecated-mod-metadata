@@ -2,6 +2,7 @@ package api
 
 import api.support.Preparation
 import org.folio.metadata.common.testing.HttpClient
+import org.junit.Ignore
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
