@@ -107,6 +107,7 @@ public interface InstanceStorageResource {
      *      e.g. {
      *       "id" : "601a8dc4-dee7-48eb-b03f-d02fdf0debd0",
      *       "title": "ADVANCING LIBRARY EDUCATION: TECHNOLOGICAL INNOVATION AND INSTRUCTIONAL DESIGN",
+     *       "publicationDate": "2013-06-01",
      *       "identifiers": [
      *         {
      *           "namespace": "isbn",
@@ -219,6 +220,7 @@ public interface InstanceStorageResource {
      *      e.g. {
      *       "id" : "601a8dc4-dee7-48eb-b03f-d02fdf0debd0",
      *       "title": "ADVANCING LIBRARY EDUCATION: TECHNOLOGICAL INNOVATION AND INSTRUCTIONAL DESIGN",
+     *       "publicationDate": "2013-06-01",
      *       "identifiers": [
      *         {
      *           "namespace": "isbn",
@@ -343,6 +345,7 @@ public interface InstanceStorageResource {
          * Returns item with a given ID e.g. {
          *   "id" : "601a8dc4-dee7-48eb-b03f-d02fdf0debd0",
          *   "title": "ADVANCING LIBRARY EDUCATION: TECHNOLOGICAL INNOVATION AND INSTRUCTIONAL DESIGN",
+         *   "publicationDate": "2013-06-01",
          *   "identifiers": [
          *     {
          *       "namespace": "isbn",
@@ -360,6 +363,7 @@ public interface InstanceStorageResource {
          *     {
          *       "id" : "601a8dc4-dee7-48eb-b03f-d02fdf0debd0",
          *       "title": "ADVANCING LIBRARY EDUCATION: TECHNOLOGICAL INNOVATION AND INSTRUCTIONAL DESIGN",
+         *       "publicationDate": "2013-06-01",
          *       "identifiers": [
          *         {
          *           "namespace": "isbn",
@@ -422,6 +426,7 @@ public interface InstanceStorageResource {
          *     {
          *       "id" : "601a8dc4-dee7-48eb-b03f-d02fdf0debd0",
          *       "title": "ADVANCING LIBRARY EDUCATION: TECHNOLOGICAL INNOVATION AND INSTRUCTIONAL DESIGN",
+         *       "publicationDate": "2013-06-01",
          *       "identifiers": [
          *         {
          *           "namespace": "isbn",
@@ -436,6 +441,7 @@ public interface InstanceStorageResource {
          *     {
          *       "id" : "601a8dc4-dee7-48eb-b03f-d02fdf0debd0",
          *       "title": "ADVANCING RESEARCH METHODS WITH NEW TECHNOLOGIES.",
+         *       "publicationDate": "2013-04-01T00:00:00Z",
          *       "identifiers": [
          *         {
          *           "namespace": "isbn",
@@ -458,6 +464,7 @@ public interface InstanceStorageResource {
          *         {
          *           "id" : "601a8dc4-dee7-48eb-b03f-d02fdf0debd0",
          *           "title": "ADVANCING LIBRARY EDUCATION: TECHNOLOGICAL INNOVATION AND INSTRUCTIONAL DESIGN",
+         *           "publicationDate": "2013-06-01",
          *           "identifiers": [
          *             {
          *               "namespace": "isbn",
@@ -472,6 +479,7 @@ public interface InstanceStorageResource {
          *         {
          *           "id" : "601a8dc4-dee7-48eb-b03f-d02fdf0debd0",
          *           "title": "ADVANCING RESEARCH METHODS WITH NEW TECHNOLOGIES.",
+         *           "publicationDate": "2013-04-01T00:00:00Z",
          *           "identifiers": [
          *             {
          *               "namespace": "isbn",
@@ -533,6 +541,7 @@ public interface InstanceStorageResource {
          * Returns a newly created item, with server-controlled fields like 'id' populated e.g. {
          *   "id" : "601a8dc4-dee7-48eb-b03f-d02fdf0debd0",
          *   "title": "ADVANCING LIBRARY EDUCATION: TECHNOLOGICAL INNOVATION AND INSTRUCTIONAL DESIGN",
+         *   "publicationDate": "2013-06-01",
          *   "identifiers": [
          *     {
          *       "namespace": "isbn",
@@ -552,6 +561,7 @@ public interface InstanceStorageResource {
          *     {
          *       "id" : "601a8dc4-dee7-48eb-b03f-d02fdf0debd0",
          *       "title": "ADVANCING LIBRARY EDUCATION: TECHNOLOGICAL INNOVATION AND INSTRUCTIONAL DESIGN",
+         *       "publicationDate": "2013-06-01",
          *       "identifiers": [
          *         {
          *           "namespace": "isbn",

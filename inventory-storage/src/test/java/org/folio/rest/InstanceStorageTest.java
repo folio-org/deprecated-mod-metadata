@@ -6,7 +6,6 @@ import io.vertx.ext.sql.ResultSet;
 import org.folio.rest.support.*;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.net.HttpURLConnection;
@@ -19,8 +18,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import static org.folio.rest.support.JsonObjectMatchers.identifierMatches;
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 public class InstanceStorageTest {
@@ -66,14 +64,12 @@ public class InstanceStorageTest {
 
     UUID id = UUID.randomUUID();
 
-    URL postInstanceUrl = instanceStorageUrl();
-
     JsonObject instanceToCreate = smallAngryPlanet(id);
 
     CompletableFuture<JsonResponse> createCompleted = new CompletableFuture();
 
-    client.post(postInstanceUrl, instanceToCreate, StorageTestSuite.TENANT_ID,
-      ResponseHandler.json(createCompleted));
+    client.post(instanceStorageUrl(), instanceToCreate,
+      StorageTestSuite.TENANT_ID, ResponseHandler.json(createCompleted));
 
     JsonResponse response = createCompleted.get(5, TimeUnit.SECONDS);
 
@@ -83,6 +79,7 @@ public class InstanceStorageTest {
 
     assertThat(instance.getString("id"), is(id.toString()));
     assertThat(instance.getString("title"), is("Long Way to a Small Angry Planet"));
+    assertThat(instance.getJsonObject("publication").getString("date"), is("2015-08-13"));
 
     JsonArray identifiers = instance.getJsonArray("identifiers");
     assertThat(identifiers.size(), is(1));
@@ -116,10 +113,12 @@ public class InstanceStorageTest {
 
     assertThat(getResponse.getStatusCode(), is(HttpURLConnection.HTTP_OK));
 
-    JsonObject itemFromGet = getResponse.getBody();
+    JsonObject instanceFromGet = getResponse.getBody();
 
-    assertThat(itemFromGet.getString("id"), is(id.toString()));
-    assertThat(itemFromGet.getString("title"), is("Nod"));
+    assertThat(instanceFromGet.getString("id"), is(id.toString()));
+    assertThat(instanceFromGet.getString("title"), is("Nod"));
+    assertThat(instanceFromGet.getJsonObject("publication").getString("date"),
+      is("2012-10-31"));
   }
 
   @Test
@@ -135,6 +134,7 @@ public class InstanceStorageTest {
 
     JsonObject replacement = instanceToCreate.copy();
     replacement.put("title", "A Long Way to a Small Angry Planet");
+    replacement.put("publication", new JsonObject().put("date", "2015-11-12"));
 
     CompletableFuture<Response> replaceCompleted = new CompletableFuture();
 
@@ -146,18 +146,20 @@ public class InstanceStorageTest {
     assertThat(putResponse.getStatusCode(), is(HttpURLConnection.HTTP_NO_CONTENT));
 
     //PUT currently cannot return a response
-//    JsonObject item = putResponse.getBody();
-//    assertThat(item.getString("id"), is(id.toString()));
-//    assertThat(item.getString("title"), is("A Long Way to a Small Angry Planet"));
+//    JsonObject instance = putResponse.getBody();
+//    assertThat(instance.getString("id"), is(id.toString()));
+//    assertThat(instance.getString("title"), is("A Long Way to a Small Angry Planet"));
 
     JsonResponse getResponse = getById(id);
 
     assertThat(getResponse.getStatusCode(), is(HttpURLConnection.HTTP_OK));
 
-    JsonObject itemFromGet = getResponse.getBody();
+    JsonObject instanceFromGet = getResponse.getBody();
 
-    assertThat(itemFromGet.getString("id"), is(id.toString()));
-    assertThat(itemFromGet.getString("title"), is("A Long Way to a Small Angry Planet"));
+    assertThat(instanceFromGet.getString("id"), is(id.toString()));
+    assertThat(instanceFromGet.getString("title"), is("A Long Way to a Small Angry Planet"));
+    assertThat(instanceFromGet.getJsonObject("publication").getString("date"),
+      is("2015-11-12"));
   }
 
   @Test
@@ -213,6 +215,8 @@ public class InstanceStorageTest {
 
     assertThat(instance.getString("id"), is(id.toString()));
     assertThat(instance.getString("title"), is("Long Way to a Small Angry Planet"));
+    assertThat(instance.getJsonObject("publication").getString("date"),
+      is("2015-08-13"));
 
     JsonArray identifiers = instance.getJsonArray("identifiers");
     assertThat(identifiers.size(), is(1));
@@ -257,6 +261,8 @@ public class InstanceStorageTest {
 
     assertThat(firstInstance.getString("id"), is(firstInstanceId.toString()));
     assertThat(firstInstance.getString("title"), is("Long Way to a Small Angry Planet"));
+    assertThat(firstInstance.getJsonObject("publication").getString("date"),
+      is("2015-08-13"));
 
     assertThat(firstInstance.getJsonArray("identifiers").size(), is(1));
     assertThat(firstInstance.getJsonArray("identifiers"),
@@ -264,6 +270,8 @@ public class InstanceStorageTest {
 
     assertThat(secondInstance.getString("id"), is(secondInstanceId.toString()));
     assertThat(secondInstance.getString("title"), is("Nod"));
+    assertThat(secondInstance.getJsonObject("publication").getString("date"),
+      is("2012-10-31"));
 
     assertThat(secondInstance.getJsonArray("identifiers").size(), is(1));
     assertThat(secondInstance.getJsonArray("identifiers"),
@@ -432,6 +440,31 @@ public class InstanceStorageTest {
     assertThat(response.getBody(), is("Tenant Must Be Provided"));
   }
 
+  @Test
+  public void publicationDateShouldBeInExtendedDateFormat()
+    throws MalformedURLException, InterruptedException,
+    ExecutionException, TimeoutException {
+
+    UUID id = UUID.randomUUID();
+
+    JsonObject instanceToCreate = smallAngryPlanet(id)
+      .put("publicationDate", "1984");
+
+    CompletableFuture<TextResponse> createCompleted = new CompletableFuture();
+
+    client.post(instanceStorageUrl(), instanceToCreate,
+      StorageTestSuite.TENANT_ID, ResponseHandler.text(createCompleted));
+
+    TextResponse response = createCompleted.get(5, TimeUnit.SECONDS);
+
+    assertThat(response.getStatusCode(), is(HttpURLConnection.HTTP_BAD_REQUEST));
+
+    String error = response.getBody();
+
+    assertThat(error,
+      containsString("publicationDate  must match \"[0-9]{4}-[0-9]{2}-[0-9]{2}\""));
+  }
+
   private void createInstance(JsonObject instanceToCreate)
     throws MalformedURLException, InterruptedException,
     ExecutionException, TimeoutException {
@@ -458,21 +491,6 @@ public class InstanceStorageTest {
     return StorageTestSuite.storageUrl("/instance-storage/instances" + subPath);
   }
 
-  private JsonObject smallAngryPlanet(UUID id) {
-    JsonArray identifiers = new JsonArray();
-
-    identifiers.add(identifier("isbn", "9781473619777"));
-
-    return createInstanceRequest(id, "Long Way to a Small Angry Planet",
-      identifiers);
-  }
-
-  private JsonObject identifier(String namespace, String value) {
-    return new JsonObject()
-      .put("namespace", namespace)
-      .put("value", value);
-  }
-
   private JsonResponse getById(UUID id)
     throws MalformedURLException, InterruptedException,
     ExecutionException, TimeoutException {
@@ -487,18 +505,13 @@ public class InstanceStorageTest {
     return getCompleted.get(5, TimeUnit.SECONDS);
   }
 
-  private JsonObject createInstanceRequest(
-    UUID id,
-    String title,
-    JsonArray identifiers) {
+  private JsonObject smallAngryPlanet(UUID id) {
+    JsonArray identifiers = new JsonArray();
 
-    JsonObject instanceToCreate = new JsonObject();
+    identifiers.add(identifier("isbn", "9781473619777"));
 
-    instanceToCreate.put("id",id.toString());
-    instanceToCreate.put("title", title);
-    instanceToCreate.put("identifiers", identifiers);
-
-    return instanceToCreate;
+    return createInstanceRequest(id, "Long Way to a Small Angry Planet",
+      identifiers, "2015-08-13");
   }
 
   private JsonObject nod(UUID id) {
@@ -507,7 +520,7 @@ public class InstanceStorageTest {
     identifiers.add(identifier("asin", "B01D1PLMDO"));
 
     return createInstanceRequest(id, "Nod",
-      identifiers);
+      identifiers, "2012-10-31");
   }
 
   private JsonObject uprooted(UUID id) {
@@ -518,7 +531,7 @@ public class InstanceStorageTest {
     identifiers.add(identifier("isbn", "9781447294146"));
 
     return createInstanceRequest(id, "Uprooted",
-      identifiers);
+      identifiers, "2015-05-21");
   }
 
   private JsonObject temeraire(UUID id) {
@@ -529,7 +542,7 @@ public class InstanceStorageTest {
     identifiers.add(identifier("isbn", "9780007258710"));
 
     return createInstanceRequest(id, "Temeraire",
-      identifiers);
+      identifiers, "2007-08-06");
   }
 
   private JsonObject interestingTimes(UUID id) {
@@ -540,6 +553,28 @@ public class InstanceStorageTest {
     identifiers.add(identifier("isbn", "9780552167541"));
 
     return createInstanceRequest(id, "Interesting Times",
-      identifiers);
+      identifiers, "1995-11-01");
+  }
+
+  private JsonObject createInstanceRequest(
+    UUID id,
+    String title,
+    JsonArray identifiers, String publicationDate) {
+
+    JsonObject instanceToCreate = new JsonObject();
+
+    instanceToCreate.put("id",id.toString());
+    instanceToCreate.put("title", title);
+    instanceToCreate.put("identifiers", identifiers);
+    instanceToCreate.put("publication", new JsonObject()
+      .put("date", publicationDate));
+
+    return instanceToCreate;
+  }
+
+  private JsonObject identifier(String namespace, String value) {
+    return new JsonObject()
+      .put("namespace", namespace)
+      .put("value", value);
   }
 }

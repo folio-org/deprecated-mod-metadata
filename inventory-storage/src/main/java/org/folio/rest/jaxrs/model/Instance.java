@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.annotation.Generated;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
@@ -21,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({
     "id",
     "title",
+    "publicationDate",
     "identifiers"
 })
 public class Instance {
@@ -35,6 +37,9 @@ public class Instance {
     @JsonProperty("title")
     @NotNull
     private String title;
+    @JsonProperty("publicationDate")
+    @Pattern(regexp = "[0-9]{4}-[0-9]{2}-[0-9]{2}")
+    private String publicationDate;
     @JsonProperty("identifiers")
     @Size(min = 0)
     @Valid
@@ -93,6 +98,31 @@ public class Instance {
 
     public Instance withTitle(String title) {
         this.title = title;
+        return this;
+    }
+
+    /**
+     * 
+     * @return
+     *     The publicationDate
+     */
+    @JsonProperty("publicationDate")
+    public String getPublicationDate() {
+        return publicationDate;
+    }
+
+    /**
+     * 
+     * @param publicationDate
+     *     The publicationDate
+     */
+    @JsonProperty("publicationDate")
+    public void setPublicationDate(String publicationDate) {
+        this.publicationDate = publicationDate;
+    }
+
+    public Instance withPublicationDate(String publicationDate) {
+        this.publicationDate = publicationDate;
         return this;
     }
 
