@@ -81,8 +81,11 @@ class Instances {
       return
     }
 
-    def newInstance = new Instance(instanceRequest.title,
-      instanceRequest.identifiers)
+    def newInstance = new Instance(
+      instanceRequest.id ?: UUID.randomUUID().toString(),
+      instanceRequest.title,
+      instanceRequest.identifiers,
+      instanceRequest?.publication?.date)
 
     storage.getInstanceCollection(context).add(newInstance, {
       RedirectResponse.created(routingContext.response(),
@@ -140,6 +143,8 @@ class Instances {
 
     representation.put("id", instance.id)
     representation.put("title", instance.title)
+    representation.put("publication", new JsonObject()
+      .put("date", instance.publicationDate))
 
     def identifiers = []
 

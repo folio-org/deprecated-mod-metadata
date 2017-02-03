@@ -89,14 +89,20 @@ abstract class InstanceCollectionExamples {
     assert createdAngryPlanet.identifiers.any {
       it.namespace == 'isbn' && it.value == '9781473619777' }
 
+    assert createdAngryPlanet.publicationDate == "2015-08-13"
+
     assert createdNod.identifiers.any {
       it.namespace == 'asin' && it.value == 'B01D1PLMDO' }
+
+    assert createdNod.publicationDate == "2012-10-31"
 
     assert createdUprooted.identifiers.any {
       it.namespace == 'isbn' && it.value == '1447294149' }
 
     assert createdUprooted.identifiers.any {
       it.namespace == 'isbn' && it.value == '9781447294146' }
+
+    assert createdUprooted.publicationDate == "2015-05-21"
   }
 
   @Test
@@ -226,29 +232,29 @@ abstract class InstanceCollectionExamples {
   }
 
   private Instance nod() {
-    new Instance("Nod")
+    new Instance("Nod", "2012-10-31")
       .addIdentifier('asin', 'B01D1PLMDO')
   }
 
   private Instance uprooted() {
-    new Instance("Uprooted")
+    new Instance("Uprooted", "2015-05-21")
       .addIdentifier('isbn', '1447294149')
       .addIdentifier('isbn', '9781447294146')
   }
 
   private Instance smallAngryPlanet() {
-    new Instance("Long Way to a Small Angry Planet")
+    new Instance("Long Way to a Small Angry Planet", "2015-08-13")
       .addIdentifier('isbn', '9781473619777')
   }
 
   private Instance temeraire() {
-    new Instance("Temeraire")
+    new Instance("Temeraire", "2007-08-06")
       .addIdentifier('isbn', '0007258712')
       .addIdentifier('isbn', '9780007258710')
   }
 
   private Instance interestingTimes() {
-    new Instance("Interesting Times")
+    new Instance("Interesting Times", "1995-11-01")
       .addIdentifier('isbn', '0552167541')
       .addIdentifier('isbn', '9780552167543')
   }

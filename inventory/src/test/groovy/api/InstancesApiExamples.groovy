@@ -26,6 +26,7 @@ class InstancesApiExamples extends Specification {
     given:
       def newInstanceRequest = new JsonObject()
         .put("title", "Long Way to a Small Angry Planet")
+        .put("publication", new JsonObject().put("date", "2015-08-13"))
         .put("identifiers", [[namespace: "isbn", value: "9781473619777"]])
 
     when:
@@ -44,6 +45,7 @@ class InstancesApiExamples extends Specification {
 
       assert createdInstance.id != null
       assert createdInstance.title == "Long Way to a Small Angry Planet"
+      assert createdInstance.publication.date == "2015-08-13"
       assert createdInstance.identifiers[0].namespace == "isbn"
       assert createdInstance.identifiers[0].value == "9781473619777"
 
@@ -171,11 +173,13 @@ class InstancesApiExamples extends Specification {
   private JsonObject createInstanceRequest(
     UUID id,
     String title,
-    JsonArray identifiers) {
+    JsonArray identifiers,
+    String publicationDate) {
 
     new JsonObject()
       .put("id",id.toString())
       .put("title", title)
+      .put("publication", new JsonObject().put("date", publicationDate))
       .put("identifiers", identifiers)
   }
 
@@ -185,7 +189,7 @@ class InstancesApiExamples extends Specification {
     identifiers.add(identifier("isbn", "9781473619777"))
 
     return createInstanceRequest(id, "Long Way to a Small Angry Planet",
-      identifiers)
+      identifiers, "2015-08-13")
   }
 
   private JsonObject nod(UUID id) {
@@ -193,7 +197,7 @@ class InstancesApiExamples extends Specification {
 
     identifiers.add(identifier("asin", "B01D1PLMDO"))
 
-    createInstanceRequest(id, "Nod", identifiers)
+    createInstanceRequest(id, "Nod", identifiers, "2012-10-31")
   }
 
   private JsonObject uprooted(UUID id) {
@@ -204,7 +208,7 @@ class InstancesApiExamples extends Specification {
     identifiers.add(identifier("isbn", "9781447294146"));
 
     createInstanceRequest(id, "Uprooted",
-      identifiers);
+      identifiers, "2015-05-21");
   }
 
   private JsonObject temeraire(UUID id) {
@@ -215,7 +219,7 @@ class InstancesApiExamples extends Specification {
     identifiers.add(identifier("isbn", "9780007258710"));
 
     createInstanceRequest(id, "Temeraire",
-      identifiers);
+      identifiers, "2007-08-06");
   }
 
   private JsonObject leviathanWakes(UUID id) {
@@ -224,7 +228,7 @@ class InstancesApiExamples extends Specification {
     identifiers.add(identifier("isbn", "1841499897"))
     identifiers.add(identifier("isbn", "9781841499895"))
 
-    createInstanceRequest(id, "Leviathan Wakes", identifiers)
+    createInstanceRequest(id, "Leviathan Wakes", identifiers, "2012-05-03")
   }
 
   private JsonObject taoOfPooh(UUID id) {
@@ -233,7 +237,7 @@ class InstancesApiExamples extends Specification {
     identifiers.add(identifier("isbn", "1405204265"))
     identifiers.add(identifier("isbn", "9781405204265"))
 
-    createInstanceRequest(id, "Tao of Pooh", identifiers)
+    createInstanceRequest(id, "Tao of Pooh", identifiers, "2003-02-06")
   }
 
   private JsonObject identifier(String namespace, String value) {
