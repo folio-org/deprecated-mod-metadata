@@ -44,7 +44,7 @@ public class ApiTestSuite {
     vertxAssistant.start()
   }
 
-  private static String apiRoot() {
+  static String apiRoot() {
     def okapiRoot = System.getProperty("okapi.address", "")
     def directRoot = "http://localhost:${ApiTestSuite.INVENTORY_VERTICLE_TEST_PORT}"
 

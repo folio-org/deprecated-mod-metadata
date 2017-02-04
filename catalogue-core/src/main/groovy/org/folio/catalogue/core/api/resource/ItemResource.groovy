@@ -103,7 +103,7 @@ class ItemResource {
   }
 
   private static void printDiagnostics(location, status, body) {
-    println "Response Received from instance resource - ${location}"
+    println "Response Received from instance resources - ${location}"
     println StringUtils.repeat("-", 25)
     println "Status Code: ${status}"
     println "Body: ${body}"

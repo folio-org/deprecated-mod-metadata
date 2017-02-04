@@ -1,13 +1,11 @@
 package org.folio.inventory.resources
 
-import io.vertx.core.json.JsonArray
-import io.vertx.core.json.JsonObject
 import io.vertx.groovy.ext.web.Router
 import io.vertx.groovy.ext.web.RoutingContext
 import io.vertx.groovy.ext.web.handler.BodyHandler
 import org.folio.inventory.domain.Instance
 import org.folio.inventory.storage.Storage
-import org.folio.metadata.common.WebContext
+import org.folio.metadata.common.VertxWebContext
 import org.folio.metadata.common.api.request.PagingParameters
 import org.folio.metadata.common.api.request.VertxBodyParser
 import org.folio.metadata.common.api.response.ClientErrorResponse
@@ -48,7 +46,7 @@ class Instances {
   }
 
   void getAll(RoutingContext routingContext) {
-    def context = new WebContext(routingContext)
+    def context = new VertxWebContext(routingContext)
 
     def limit = context.getIntegerParameter("limit", 10)
     def offset = context.getIntegerParameter("offset", 0)
@@ -58,20 +56,22 @@ class Instances {
       storage.getInstanceCollection(context).findAll(
         new PagingParameters(limit, offset), {
         JsonResponse.success(routingContext.response(),
-          toRepresentation(it, context))
+          new InstanceRepresentation(relativeInstancesPath())
+            .toJson(it, context))
       })
     }
     else {
       storage.getInstanceCollection(context).findByCql(search,
         new PagingParameters(limit, offset), {
         JsonResponse.success(routingContext.response(),
-          toRepresentation(it, context))
+          new InstanceRepresentation(relativeInstancesPath())
+            .toJson(it, context))
       })
     }
   }
 
   void create(RoutingContext routingContext) {
-    def context = new WebContext(routingContext)
+    def context = new VertxWebContext(routingContext)
 
     Map instanceRequest = new VertxBodyParser().toMap(routingContext)
 
@@ -94,7 +94,7 @@ class Instances {
   }
 
   void deleteAll(RoutingContext routingContext) {
-    def context = new WebContext(routingContext)
+    def context = new VertxWebContext(routingContext)
 
     storage.getInstanceCollection(context).empty {
       SuccessResponse.noContent(routingContext.response())
@@ -102,14 +102,15 @@ class Instances {
   }
 
   void getById(RoutingContext routingContext) {
-    def context = new WebContext(routingContext)
+    def context = new VertxWebContext(routingContext)
 
     storage.getInstanceCollection(context).findById(
       routingContext.request().getParam("id"),
       {
         if(it != null) {
           JsonResponse.success(routingContext.response(),
-            toRepresentation(it, context))
+            new InstanceRepresentation(relativeInstancesPath())
+              .toJson(it, context))
         }
         else {
           ClientErrorResponse.notFound(routingContext.response())
@@ -119,51 +120,6 @@ class Instances {
 
   private static String relativeInstancesPath() {
     "/inventory/instances"
-  }
-
-  private JsonObject toRepresentation(List<Instance> instances, WebContext context) {
-    def representation = new JsonObject()
-
-    def results = new JsonArray()
-
-    instances.each {
-      results.add(toRepresentation(it, context))
-    }
-
-    representation.put("instances", results)
-
-    representation
-  }
-
-  private JsonObject toRepresentation(Instance instance, WebContext context) {
-    def representation = new JsonObject()
-
-    representation.put("@context", context.absoluteUrl(
-      relativeInstancesPath() + "/context").toString())
-
-    representation.put("id", instance.id)
-    representation.put("title", instance.title)
-    representation.put("publication", new JsonObject()
-      .put("date", instance.publicationDate))
-
-    def identifiers = []
-
-    instance.identifiers.each { identifier ->
-      def identifierRepresentation = [:]
-
-      identifierRepresentation.namespace = identifier.namespace
-      identifierRepresentation.value = identifier.value
-
-      identifiers.add(identifierRepresentation)
-    }
-
-    representation.put('identifiers', identifiers)
-
-    representation.put('links',
-      ['self': context.absoluteUrl(
-        relativeInstancesPath() + "/${instance.id}").toString()])
-
-    representation
   }
 
   private boolean isEmpty(String string) {

@@ -8,7 +8,7 @@ import org.folio.inventory.domain.ingest.IngestMessages
 import org.folio.inventory.parsing.ModsParser
 import org.folio.inventory.parsing.UTF8LiteralCharacterEncoding
 import org.folio.inventory.storage.Storage
-import org.folio.metadata.common.WebContext
+import org.folio.metadata.common.VertxWebContext
 import org.folio.metadata.common.api.response.ClientErrorResponse
 import org.folio.metadata.common.api.response.JsonResponse
 import org.folio.metadata.common.api.response.RedirectResponse
@@ -39,7 +39,7 @@ class ModsIngestion {
 
   private status(RoutingContext routingContext) {
 
-    def context = new WebContext(routingContext)
+    def context = new VertxWebContext(routingContext)
 
     storage.getIngestJobCollection(context)
       .findById(routingContext.request().getParam("id"), {
@@ -63,7 +63,7 @@ class ModsIngestion {
 
           def convertedRecords = new IngestRecordConverter().toJson(records)
 
-          def context = new WebContext(routingContext)
+          def context = new VertxWebContext(routingContext)
 
           storage.getIngestJobCollection(context)
             .add(new IngestJob(IngestJobState.REQUESTED), { job ->

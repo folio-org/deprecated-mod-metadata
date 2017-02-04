@@ -1,7 +1,5 @@
 package org.folio.inventory.resources
 
-import io.vertx.core.json.JsonArray
-import io.vertx.core.json.JsonObject
 import io.vertx.groovy.ext.web.Router
 import io.vertx.groovy.ext.web.RoutingContext
 import io.vertx.groovy.ext.web.handler.BodyHandler
@@ -9,7 +7,7 @@ import org.folio.inventory.domain.Instance
 import org.folio.inventory.domain.Item
 import org.folio.inventory.storage.Storage
 import org.folio.metadata.common.WaitForAllFutures
-import org.folio.metadata.common.WebContext
+import org.folio.metadata.common.VertxWebContext
 import org.folio.metadata.common.api.request.PagingParameters
 import org.folio.metadata.common.api.request.VertxBodyParser
 import org.folio.metadata.common.api.response.ClientErrorResponse
@@ -18,7 +16,6 @@ import org.folio.metadata.common.api.response.RedirectResponse
 import org.folio.metadata.common.api.response.SuccessResponse
 
 class Items {
-
   private final Storage storage
 
   Items(final Storage storage) {
@@ -36,7 +33,7 @@ class Items {
   }
 
   void getAll(RoutingContext routingContext) {
-    def context = new WebContext(routingContext)
+    def context = new VertxWebContext(routingContext)
 
     def limit = context.getIntegerParameter("limit", 10)
     def offset = context.getIntegerParameter("offset", 0)
@@ -55,7 +52,8 @@ class Items {
 
         waitForAllInstances.thenAccept({ instances ->
           JsonResponse.success(routingContext.response(),
-            toRepresentation(it, instances, context))
+            new ItemRepresentation(relativeItemsPath())
+              .toJson(it, instances, context))
         })
       })
     }
@@ -70,16 +68,16 @@ class Items {
           }
 
           waitForAllInstances.thenAccept({ instances ->
-            println("Got all instances")
             JsonResponse.success(routingContext.response(),
-              toRepresentation(it, instances, context))
+              new ItemRepresentation(relativeItemsPath())
+                .toJson(it, instances, context))
           })
       })
     }
   }
 
   void deleteAll(RoutingContext routingContext) {
-    def context = new WebContext(routingContext)
+    def context = new VertxWebContext(routingContext)
 
     storage.getItemCollection(context).empty {
       SuccessResponse.noContent(routingContext.response())
@@ -87,7 +85,7 @@ class Items {
   }
 
   void create(RoutingContext routingContext) {
-    def context = new WebContext(routingContext)
+    def context = new VertxWebContext(routingContext)
 
     Map itemRequest = new VertxBodyParser().toMap(routingContext)
 
@@ -101,7 +99,7 @@ class Items {
   }
 
   void getById(RoutingContext routingContext) {
-    def context = new WebContext(routingContext)
+    def context = new VertxWebContext(routingContext)
 
     storage.getItemCollection(context).findById(
       routingContext.request().getParam("id"),
@@ -109,7 +107,8 @@ class Items {
         if(it != null) {
           storage.getInstanceCollection(context).findById(it.instanceId,
             { instance -> JsonResponse.success(routingContext.response(),
-              toRepresentation(it, instance, context))
+              new ItemRepresentation(relativeItemsPath())
+                .toJson(it, instance, context))
             }
           )
         }
@@ -121,40 +120,5 @@ class Items {
 
   private static String relativeItemsPath() {
     "/inventory/items"
-  }
-
-  private JsonObject toRepresentation(List<Item> items,
-                                      List<Instances> instances,
-                                      WebContext context) {
-
-    def representation = new JsonObject()
-
-    def results = new JsonArray()
-
-    items.each { item ->
-      results.add(toRepresentation(item,
-        instances.find({ it.id == item.instanceId }), context))
-    }
-
-    representation.put("items", results)
-
-    representation
-  }
-
-  private JsonObject toRepresentation(Item item, Instance instance,
-                                      WebContext context) {
-
-    def representation = new JsonObject()
-    representation.put("id", item.id)
-    representation.put("instanceId", item.instanceId)
-    representation.put("title", item.title)
-    representation.put("barcode", item.barcode)
-    representation.put("publicationDate", instance.publicationDate)
-
-    representation.put('links',
-      ['self': context.absoluteUrl(
-        relativeItemsPath() + "/${item.id}").toString()])
-
-    representation
   }
 }
