@@ -33,10 +33,10 @@ class InMemoryInstanceCollection
 
   @Override
   void findAll(PagingParameters pagingParameters,
-               Consumer<Success<List<Instance>>> resultCallback,
+               Consumer<Success<Map>> resultCallback,
                Consumer<Failure> failureCallback) {
 
-    collection.some(pagingParameters, resultCallback)
+    collection.some(pagingParameters, "instances", resultCallback)
   }
 
   @Override
@@ -48,10 +48,10 @@ class InMemoryInstanceCollection
   @Override
   void findByCql(String cqlQuery,
                  PagingParameters pagingParameters,
-                 Consumer<Success<List<Instance>>> resultCallback,
+                 Consumer<Success<Map>> resultCallback,
                  Consumer<Failure> failureCallback) {
 
-    collection.find(cqlQuery, pagingParameters, resultCallback)
+    collection.find(cqlQuery, pagingParameters, "instances", resultCallback)
   }
 
   @Override

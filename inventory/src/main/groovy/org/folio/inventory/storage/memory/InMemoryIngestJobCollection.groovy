@@ -37,10 +37,10 @@ class InMemoryIngestJobCollection implements IngestJobCollection {
 
   @Override
   void findAll(PagingParameters pagingParameters,
-               Consumer<Success<List<IngestJob>>> resultCallback,
+               Consumer<Success<Map>> resultCallback,
                Consumer<Failure> failureCallback) {
 
-    collection.some(pagingParameters, resultCallback)
+    collection.some(pagingParameters, "jobs", resultCallback)
   }
 
   @Override

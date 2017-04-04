@@ -56,7 +56,9 @@ abstract class ItemCollectionExamples {
     collection.findAll(PagingParameters.defaults(),
       succeed(findFuture), fail(findFuture))
 
-    def allItems = getOnCompletion(findFuture)
+    def allItemsWrapped = getOnCompletion(findFuture)
+
+    def allItems = allItemsWrapped.items
 
     assert allItems.size() == 0
   }
@@ -67,12 +69,14 @@ abstract class ItemCollectionExamples {
 
     addSomeExamples(collection)
 
-    def findFuture = new CompletableFuture<List<Item>>()
+    def findFuture = new CompletableFuture<Map>()
 
     collection.findAll(PagingParameters.defaults(), succeed(findFuture),
       fail(findFuture))
 
-    def allItems = getOnCompletion(findFuture)
+    def allItemsWrapped = getOnCompletion(findFuture)
+
+    def allItems = allItemsWrapped.items
 
     assert allItems.size() == 3
 
@@ -211,12 +215,14 @@ abstract class ItemCollectionExamples {
 
     assert findFuture.get() == null
 
-    def findAllFuture = new CompletableFuture<List<Item>>()
+    def findAllFuture = new CompletableFuture<Map>()
 
     collection.findAll(PagingParameters.defaults(), succeed(findAllFuture),
       fail(findAllFuture))
 
-    def allItems = getOnCompletion(findAllFuture)
+    def allItemsWrapped = getOnCompletion(findAllFuture)
+
+    def allItems = allItemsWrapped.items
 
     assert allItems.size() == 3
   }
@@ -235,8 +241,8 @@ abstract class ItemCollectionExamples {
 
     allAdded.waitForCompletion()
 
-    def firstPageFuture = new CompletableFuture<Collection>()
-    def secondPageFuture = new CompletableFuture<Collection>()
+    def firstPageFuture = new CompletableFuture<Map>()
+    def secondPageFuture = new CompletableFuture<Map>()
 
     collection.findAll(new PagingParameters(3, 0), succeed(firstPageFuture),
       fail(secondPageFuture))
@@ -244,11 +250,14 @@ abstract class ItemCollectionExamples {
     collection.findAll(new PagingParameters(3, 3), succeed(secondPageFuture),
       fail(secondPageFuture))
 
-    def firstPage = getOnCompletion(firstPageFuture)
-    def secondPage = getOnCompletion(secondPageFuture)
+    def firstPageWrapped = getOnCompletion(firstPageFuture)
+    def secondPageWrapped = getOnCompletion(secondPageFuture)
 
-    assert firstPage.size() == 3
-    assert secondPage.size() == 2
+    def firstPageItems = firstPageWrapped.items
+    def secondPageItems = secondPageWrapped.items
+
+    assert firstPageItems.size() == 3
+    assert secondPageItems.size() == 2
   }
 
   @Test
@@ -273,12 +282,14 @@ abstract class ItemCollectionExamples {
 
     def addedSmallAngryPlanet = getOnCompletion(firstAddFuture)
 
-    def findFuture = new CompletableFuture<List<Item>>()
+    def findFuture = new CompletableFuture<Map>()
 
     collection.findByCql("title=\"*Small Angry*\"", new PagingParameters(10, 0),
       succeed(findFuture), fail(findFuture))
 
-    def findByNameResults = getOnCompletion(findFuture)
+    def findByNameResultsWrapped = getOnCompletion(findFuture)
+
+    def findByNameResults = findByNameResultsWrapped.items
 
     assert findByNameResults.size() == 1
     assert findByNameResults[0].id == addedSmallAngryPlanet.id
@@ -305,12 +316,14 @@ abstract class ItemCollectionExamples {
 
     def addedSmallAngryPlanet = getOnCompletion(firstAddFuture)
 
-    def findFuture = new CompletableFuture<List<Item>>()
+    def findFuture = new CompletableFuture<Map>()
 
     collection.findByCql("barcode=036000291452", new PagingParameters(10, 0),
       succeed(findFuture), fail(findFuture))
 
-    def findByBarcodeResults = getOnCompletion(findFuture)
+    def findByBarcodeResultsWrapped = getOnCompletion(findFuture)
+
+    def findByBarcodeResults = findByBarcodeResultsWrapped.items
 
     assert findByBarcodeResults.size() == 1
     assert findByBarcodeResults[0].id == addedSmallAngryPlanet.id

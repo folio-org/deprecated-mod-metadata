@@ -20,20 +20,25 @@ class InMemoryCollection<T> {
   }
 
   void some(PagingParameters pagingParameters,
-            Consumer<Success> resultCallback) {
+            String collectionName,
+            Consumer<Success<Map>> resultCallback) {
 
-    resultCallback.accept(new Success(all().stream()
+    def paged = all().stream()
       .skip(pagingParameters.offset)
       .limit(pagingParameters.limit)
-      .collect()))
+      .collect()
+
+    resultCallback.accept(new Success([(collectionName) : paged]))
   }
 
   void findOne(Closure matcher, Consumer<Success<T>> successCallback) {
     successCallback.accept(new Success(items.find(matcher)))
   }
 
-  void find(String cqlQuery, PagingParameters pagingParameters,
-            Consumer<Success<List>> resultCallback) {
+  void find(String cqlQuery,
+            PagingParameters pagingParameters,
+            String collectionName,
+            Consumer<Success<Map>> resultCallback) {
 
     def (field, searchTerm) = new CqlParser().parseCql(cqlQuery)
 
@@ -46,7 +51,7 @@ class InMemoryCollection<T> {
       .limit(pagingParameters.limit)
       .collect()
 
-    resultCallback.accept(new Success(paged))
+    resultCallback.accept(new Success([(collectionName) : paged]))
   }
 
   void add(T item, Consumer<Success<T>> resultCallback) {

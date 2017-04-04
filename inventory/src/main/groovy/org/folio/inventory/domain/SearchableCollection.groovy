@@ -9,6 +9,6 @@ import java.util.function.Consumer
 interface SearchableCollection<T> {
   void findByCql(String cqlQuery,
                  PagingParameters pagingParameters,
-                 Consumer<Success<List<T>>> resultsCallback,
+                 Consumer<Success<Map>> resultsCallback,
                  Consumer<Failure> failureCallback)
 }

@@ -20,7 +20,7 @@ class Instances {
     this.storage = storage
   }
 
-  public void register(Router router) {
+  void register(Router router) {
     router.post(relativeInstancesPath() + "*").handler(BodyHandler.create())
     router.put(relativeInstancesPath() + "*").handler(BodyHandler.create())
 
@@ -158,12 +158,12 @@ class Instances {
     "/inventory/instances"
   }
 
-  private JsonObject toRepresentation(List<Instance> instances, WebContext context) {
+  private JsonObject toRepresentation(Map wrappedInstances, WebContext context) {
     def representation = new JsonObject()
 
     def results = new JsonArray()
 
-    instances.each {
+    wrappedInstances.instances.each {
       results.add(toRepresentation(it, context))
     }
 

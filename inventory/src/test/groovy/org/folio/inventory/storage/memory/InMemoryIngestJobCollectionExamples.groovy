@@ -33,12 +33,14 @@ class InMemoryIngestJobCollectionExamples {
 
     waitForCompletion(addFuture)
 
-    def findFuture = new CompletableFuture<List<IngestJob>>()
+    def findFuture = new CompletableFuture<Map>()
 
     collection.findAll(PagingParameters.defaults(), succeed(findFuture),
       fail(findFuture))
 
-    def allJobs = getOnCompletion(findFuture)
+    def allJobsWrapped = getOnCompletion(findFuture)
+
+    def allJobs = allJobsWrapped.jobs
 
     assert allJobs.size() == 1
 
@@ -109,13 +111,15 @@ class InMemoryIngestJobCollectionExamples {
 
     waitForCompletion(updateFuture)
 
-    def findAllFuture = new CompletableFuture<List<IngestJob>>()
+    def findAllFuture = new CompletableFuture<Map>()
 
     collection.findAll(PagingParameters.defaults(), succeed(findAllFuture),
       fail(findAllFuture))
 
-    def all = getOnCompletion(findAllFuture)
+    def allJobsWrapped = getOnCompletion(findAllFuture)
 
-    assert all.count({ it.id == added.id }) == 1
+    def allJobs = allJobsWrapped.jobs
+
+    assert allJobs.count({ it.id == added.id }) == 1
   }
 }

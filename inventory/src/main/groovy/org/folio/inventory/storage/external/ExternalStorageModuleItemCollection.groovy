@@ -107,7 +107,7 @@ class ExternalStorageModuleItemCollection
 
   @Override
   void findAll(PagingParameters pagingParameters,
-               Consumer<Success<List<Item>>> resultCallback,
+               Consumer<Success<Map>> resultCallback,
                Consumer<Failure> failureCallback) {
 
     String location = String.format(storageAddress
@@ -129,7 +129,7 @@ class ExternalStorageModuleItemCollection
             foundItems.add(mapFromJson(it))
           }
 
-          resultCallback.accept(new Success(foundItems))
+          resultCallback.accept(new Success(["items" : foundItems]))
         }
         else {
           failureCallback.accept(new Failure(responseBody, statusCode))
@@ -175,13 +175,15 @@ class ExternalStorageModuleItemCollection
   @Override
   void findByCql(String cqlQuery,
                  PagingParameters pagingParameters,
-                 Consumer<Success<List<Item>>> resultCallback,
+                 Consumer<Success<Map>> resultCallback,
                  Consumer<Failure> failureCallback) {
 
     def encodedQuery = URLEncoder.encode(cqlQuery, "UTF-8")
 
     def location =
-      "${storageAddress}/item-storage/items?query=${encodedQuery}"
+      "${storageAddress}/item-storage/items?query=${encodedQuery}" +
+        String.format("&limit=%s&offset=%s", pagingParameters.limit,
+          pagingParameters.offset)
 
     def onResponse = { response ->
       response.bodyHandler({ buffer ->
@@ -197,7 +199,7 @@ class ExternalStorageModuleItemCollection
             foundItems.add(mapFromJson(it))
           }
 
-          resultCallback.accept(new Success(foundItems))
+          resultCallback.accept(new Success(["items" : foundItems]))
         }
         else {
           failureCallback.accept(new Failure(responseBody, statusCode))

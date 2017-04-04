@@ -52,7 +52,7 @@ class ItemRepresentation {
   }
 
   JsonObject toJson(
-    List<Item> items,
+    Map wrappedItems,
     Map<String, JsonObject> materialTypes,
     WebContext context) {
 
@@ -60,7 +60,7 @@ class ItemRepresentation {
 
     def results = new JsonArray()
 
-    items.each { item ->
+    wrappedItems.items.each { item ->
       def materialType = materialTypes.get(item?.materialType?.id)
 
       results.add(toJson(item, materialType, context))
@@ -71,14 +71,14 @@ class ItemRepresentation {
     representation
   }
 
-  JsonObject toJson(List<Item> items,
+  JsonObject toJson(Map wrappedItems,
                     WebContext context) {
 
     def representation = new JsonObject()
 
     def results = new JsonArray()
 
-    items.each { item ->
+    wrappedItems.items.each { item ->
       results.add(toJson(item, context))
     }
 

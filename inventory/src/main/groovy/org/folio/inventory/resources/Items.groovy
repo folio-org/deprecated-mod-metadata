@@ -88,7 +88,7 @@ class Items {
     itemCollection.findByCql("barcode=${newItem.barcode}",
       PagingParameters.defaults(), {
 
-      if(it.result.size() == 0) {
+      if(it.result.items.size() == 0) {
         itemCollection.add(newItem, { Success success ->
           RedirectResponse.created(routingContext.response(),
             context.absoluteUrl(
@@ -123,7 +123,7 @@ class Items {
           itemCollection.findByCql("barcode=${updatedItem.barcode}",
             PagingParameters.defaults(), {
 
-            if(it.result.size() == 1 && it.result.first().id == updatedItem.id) {
+            if(it.result.items.size() == 1 && it.result.items.first().id == updatedItem.id) {
               itemCollection.update(updatedItem, {
                 SuccessResponse.noContent(routingContext.response()) },
                 { Failure failure -> ServerErrorResponse.internalError(
@@ -221,13 +221,13 @@ class Items {
   private respondWithManyItems(
     RoutingContext routingContext,
     WebContext context,
-    List<Item> items) {
+    Map wrappedItems) {
 
     def materialTypesClient = createMaterialTypesClient(routingContext, context)
 
     def allFutures = new ArrayList<CompletableFuture<Response>>()
 
-    def materialTypeIds = items.stream()
+    def materialTypeIds = wrappedItems.items.stream()
       .map({ it?.materialType?.id })
       .filter({ it != null })
       .distinct()
@@ -254,7 +254,7 @@ class Items {
         .collect(Collectors.toMap({ it.getString("id") }, { it }))
 
       JsonResponse.success(routingContext.response(),
-        new ItemRepresentation(relativeItemsPath()).toJson(items,
+        new ItemRepresentation(relativeItemsPath()).toJson(wrappedItems,
           foundMaterialTypes, context))
     });
   }

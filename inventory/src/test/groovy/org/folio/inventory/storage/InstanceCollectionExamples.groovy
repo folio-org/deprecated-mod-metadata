@@ -25,9 +25,7 @@ abstract class InstanceCollectionExamples {
   }
 
   @Before
-  public void before() {
-    def emptied = new CompletableFuture()
-
+  void before() {
     emptyCollection(collectionProvider.getInstanceCollection(firstTenantId,
       firstTenantToken))
 
@@ -46,12 +44,14 @@ abstract class InstanceCollectionExamples {
 
     waitForCompletion(emptied)
 
-    def findFuture = new CompletableFuture<List<Item>>()
+    def findFuture = new CompletableFuture<Map>()
 
     collection.findAll(PagingParameters.defaults(), succeed(findFuture),
       fail(findFuture))
 
-    def allInstances = getOnCompletion(findFuture)
+    def allInstancesWrapped = getOnCompletion(findFuture)
+
+    def allInstances = allInstancesWrapped.instances
 
     assert allInstances.size() == 0
   }
@@ -62,12 +62,14 @@ abstract class InstanceCollectionExamples {
 
     addSomeExamples(collection)
 
-    def findFuture = new CompletableFuture<List<Instance>>()
+    def findFuture = new CompletableFuture<Map>()
 
     collection.findAll(PagingParameters.defaults(), succeed(findFuture),
       fail(findFuture))
 
-    def allInstances = getOnCompletion(findFuture)
+    def allInstancesWrapped = getOnCompletion(findFuture)
+
+    def allInstances = allInstancesWrapped.instances
 
     assert allInstances.size() == 3
 
@@ -171,8 +173,8 @@ abstract class InstanceCollectionExamples {
 
     allAdded.waitForCompletion()
 
-    def firstPageFuture = new CompletableFuture<Success<Collection>>()
-    def secondPageFuture = new CompletableFuture<Success<Collection>>()
+    def firstPageFuture = new CompletableFuture<Success<Map>>()
+    def secondPageFuture = new CompletableFuture<Success<Map>>()
 
     collection.findAll(new PagingParameters(3, 0), complete(firstPageFuture),
       fail(firstPageFuture))
@@ -182,8 +184,11 @@ abstract class InstanceCollectionExamples {
     def firstPage = getOnCompletion(firstPageFuture).result
     def secondPage = getOnCompletion(secondPageFuture).result
 
-    assert firstPage.size() == 3
-    assert secondPage.size() == 2
+    def firstPageInstances = firstPage.instances
+    def secondPageInstances = secondPage.instances
+
+    assert firstPageInstances.size() == 3
+    assert secondPageInstances.size() == 2
   }
 
   @Test
@@ -205,19 +210,21 @@ abstract class InstanceCollectionExamples {
 
     waitForCompletion(deleted)
 
-    def findFuture = new CompletableFuture<Item>()
+    def findFuture = new CompletableFuture<Instance>()
 
     collection.findById(instanceToBeDeleted.id, succeed(findFuture),
       fail(findFuture))
 
     assert findFuture.get() == null
 
-    def findAllFuture = new CompletableFuture<List<Item>>()
+    def findAllFuture = new CompletableFuture<Map>()
 
     collection.findAll(PagingParameters.defaults(), succeed(findAllFuture),
       fail(findAllFuture))
 
-    def allInstances = getOnCompletion(findAllFuture)
+    def allInstancesWrapped = getOnCompletion(findAllFuture)
+
+    def allInstances = allInstancesWrapped.instances
 
     assert allInstances.size() == 3
   }
@@ -273,12 +280,14 @@ abstract class InstanceCollectionExamples {
 
     def addedSmallAngryPlanet = getOnCompletion(firstAddFuture)
 
-    def findFuture = new CompletableFuture<List<Instance>>()
+    def findFuture = new CompletableFuture<Map>()
 
     collection.findByCql("title=\"*Small Angry*\"",
       new PagingParameters(10, 0), succeed(findFuture), fail(findFuture))
 
-    def findByNameResults = getOnCompletion(findFuture)
+    def findByNameResultsWrapped = getOnCompletion(findFuture)
+
+    def findByNameResults = findByNameResultsWrapped.instances
 
     assert findByNameResults.size() == 1
     assert findByNameResults[0].id == addedSmallAngryPlanet.id

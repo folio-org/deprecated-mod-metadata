@@ -16,7 +16,7 @@ interface AsynchronousCollection<T> {
                 Consumer<Success<T>> resultCallback,
                 Consumer<Failure> failureCallback)
   void findAll(PagingParameters pagingParameters,
-               Consumer<Success<List<T>>> resultsCallback,
+               Consumer<Success<Map>> resultsCallback,
                Consumer<Failure> failureCallback)
   void delete(String id,
               Consumer<Success> completionCallback,
