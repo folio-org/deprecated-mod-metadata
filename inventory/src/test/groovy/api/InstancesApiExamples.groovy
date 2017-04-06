@@ -154,14 +154,15 @@ class InstancesApiExamples extends Specification {
     when:
       def (deleteResponse, deleteBody) = client.delete(ApiRoot.instances())
 
-      def (_, body) = client.get(ApiRoot.instances())
-      def instances = body.instances
+      def (_, wrappedInstances) = client.get(ApiRoot.instances())
+      def instances = wrappedInstances.instances
 
     then:
       assert deleteResponse.status == 204
       assert deleteBody == null
 
       assert instances.size() == 0
+      assert wrappedInstances.totalRecords == 0
   }
 
   void "Can delete a single instance"() {
@@ -184,9 +185,10 @@ class InstancesApiExamples extends Specification {
 
       assert getResponse.status == 404
 
-      def (__, getAllBody) = client.get(ApiRoot.instances())
+      def (__, wrappedInstances) = client.get(ApiRoot.instances())
 
-      assert getAllBody.instances.size() == 2
+      assert wrappedInstances.instances.size() == 2
+      assert wrappedInstances.totalRecords == 2
   }
 
   void "Can get all instances"() {
@@ -196,12 +198,13 @@ class InstancesApiExamples extends Specification {
       createInstance(temeraire(UUID.randomUUID()))
 
     when:
-      def (response, body) = client.get(ApiRoot.instances())
-      def instances = body.instances
+      def (response, wrappedInstances) = client.get(ApiRoot.instances())
+      def instances = wrappedInstances.instances
 
     then:
       assert response.status == 200
       assert instances.size() == 3
+      assert wrappedInstances.totalRecords == 3
 
       hasCollectionProperties(instances)
   }
@@ -228,6 +231,9 @@ class InstancesApiExamples extends Specification {
       assert secondPageResponse.status == 200
       assert secondPage.instances.size() == 2
 
+      assert firstPage.totalRecords == 5
+      assert secondPage.totalRecords == 5
+
       hasCollectionProperties(firstPage.instances)
       hasCollectionProperties(secondPage.instances)
   }
@@ -248,14 +254,15 @@ class InstancesApiExamples extends Specification {
       createInstance(uprooted(UUID.randomUUID()))
 
     when:
-      def (response, body) = client.get(
+      def (response, wrappedInstances) = client.get(
         ApiRoot.instances("query=title=*Small%20Angry*"))
 
-      def instances = body.instances
+      def instances = wrappedInstances.instances
 
     then:
       assert response.status == 200
       assert instances.size() == 1
+      assert wrappedInstances.totalRecords == 1
 
       assert instances[0].title == "Long Way to a Small Angry Planet"
 

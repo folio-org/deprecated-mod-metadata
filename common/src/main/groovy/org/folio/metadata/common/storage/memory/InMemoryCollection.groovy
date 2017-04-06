@@ -23,12 +23,15 @@ class InMemoryCollection<T> {
             String collectionName,
             Consumer<Success<Map>> resultCallback) {
 
+    def totalRecords = all().size()
+
     def paged = all().stream()
       .skip(pagingParameters.offset)
       .limit(pagingParameters.limit)
       .collect()
 
-    resultCallback.accept(new Success([(collectionName) : paged]))
+    resultCallback.accept(new Success(
+      wrapFindResult(collectionName, paged, totalRecords)))
   }
 
   void findOne(Closure matcher, Consumer<Success<T>> successCallback) {
@@ -51,7 +54,8 @@ class InMemoryCollection<T> {
       .limit(pagingParameters.limit)
       .collect()
 
-    resultCallback.accept(new Success([(collectionName) : paged]))
+    resultCallback.accept(new Success(
+      wrapFindResult(collectionName, paged, filtered.size())))
   }
 
   void add(T item, Consumer<Success<T>> resultCallback) {
@@ -73,5 +77,16 @@ class InMemoryCollection<T> {
   void remove(String id, Consumer<Success> completionCallback) {
     items.removeIf({ it.id == id })
     completionCallback.accept(new Success())
+  }
+
+  private Map wrapFindResult(
+    String collectionName,
+    Collection pagedRecords,
+    int totalRecords) {
+
+    [
+      (collectionName): pagedRecords,
+      "totalRecords"  : totalRecords
+    ]
   }
 }

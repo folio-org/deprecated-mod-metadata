@@ -119,7 +119,9 @@ class ExternalStorageModuleInstanceCollection
         def statusCode = response.statusCode()
 
         if(statusCode == 200) {
-          def instances = new JsonObject(responseBody).getJsonArray("instances")
+          def wrappedInstances = new JsonObject(responseBody)
+
+          def instances = wrappedInstances.getJsonArray("instances")
 
           def foundInstances = new ArrayList<Instance>()
 
@@ -127,7 +129,10 @@ class ExternalStorageModuleInstanceCollection
             foundInstances.add(mapFromJson(it))
           }
 
-          resultCallback.accept(new Success(["instances" : foundInstances]))
+          resultCallback.accept(new Success([
+            "instances" : foundInstances,
+            "totalRecords" : wrappedInstances.getInteger("totalRecords")
+          ]))
         }
         else {
           failureCallback.accept(new Failure(responseBody, statusCode))
@@ -218,7 +223,9 @@ class ExternalStorageModuleInstanceCollection
         def statusCode = response.statusCode()
 
         if(statusCode == 200) {
-          def instances = new JsonObject(responseBody).getJsonArray("instances")
+          def wrappedInstances = new JsonObject(responseBody)
+
+          def instances = wrappedInstances.getJsonArray("instances")
 
           def foundInstances = new ArrayList<Instance>()
 
@@ -226,7 +233,10 @@ class ExternalStorageModuleInstanceCollection
             foundInstances.add(mapFromJson(it))
           }
 
-          resultCallback.accept(new Success(["instances" : foundInstances]))
+          resultCallback.accept(new Success([
+            "instances" : foundInstances,
+            "totalRecords" : wrappedInstances.getInteger("totalRecords")
+          ]))
         }
         else {
           failureCallback.accept(new Failure(responseBody, statusCode))

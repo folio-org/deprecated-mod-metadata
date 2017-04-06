@@ -167,7 +167,9 @@ class Instances {
       results.add(toRepresentation(it, context))
     }
 
-    representation.put("instances", results)
+    representation
+      .put("instances", results)
+      .put("totalRecords", wrappedInstances.totalRecords)
 
     representation
   }
