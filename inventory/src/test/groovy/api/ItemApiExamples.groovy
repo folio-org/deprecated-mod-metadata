@@ -254,13 +254,14 @@ class ItemApiExamples extends Specification {
     when:
       def (deleteResponse, deleteBody) = client.delete(ApiRoot.items())
 
-      def (_, body) = client.get(ApiRoot.items())
+      def (_, wrappedItems) = client.get(ApiRoot.items())
 
     then:
       assert deleteResponse.status == 204
       assert deleteBody == null
 
-      assert body.items.size() == 0
+      assert wrappedItems.items.size() == 0
+      assert wrappedItems.totalRecords == 0
   }
 
   void "Can delete a single item"() {
@@ -291,9 +292,10 @@ class ItemApiExamples extends Specification {
 
       assert getResponse.status == 404
 
-      def (__, getAllBody) = client.get(ApiRoot.items())
+      def (__, wrappedItems) = client.get(ApiRoot.items())
 
-      assert getAllBody.items.size() == 2
+      assert wrappedItems.items.size() == 2
+      assert wrappedItems.totalRecords == 2
   }
 
   void "Can page all items"() {
@@ -329,9 +331,11 @@ class ItemApiExamples extends Specification {
     then:
       assert firstPageResponse.status == 200
       assert firstPage.items.size() == 3
+      assert firstPage.totalRecords == 5
 
       assert secondPageResponse.status == 200
       assert secondPage.items.size() == 2
+      assert secondPage.totalRecords == 5
 
       firstPage.items.each {
         selfLinkRespectsWayResourceWasReached(it)
@@ -396,15 +400,16 @@ class ItemApiExamples extends Specification {
       createItem(nodInstance.title, nodInstance.id, "564566456546")
 
     when:
-      def (response, body) = client.get(
+      def (response, wrappedItems) = client.get(
         ApiRoot.items("query=title=*Small%20Angry*"))
 
     then:
       assert response.status == 200
 
-      def items = body.items
+      def items = wrappedItems.items
 
       assert items.size() == 1
+      assert wrappedItems.totalRecords == 1
 
       def firstItem = items[0]
 

@@ -120,16 +120,20 @@ class ExternalStorageModuleItemCollection
         def statusCode = response.statusCode()
 
         if(statusCode == 200) {
-          def itemsFromServer = new JsonObject(responseBody)
-            .getJsonArray("items")
+          def wrappedItems = new JsonObject(responseBody)
+
+          def items = wrappedItems.getJsonArray("items")
 
           def foundItems = new ArrayList<Item>()
 
-          itemsFromServer.each {
+          items.each {
             foundItems.add(mapFromJson(it))
           }
 
-          resultCallback.accept(new Success(["items" : foundItems]))
+          resultCallback.accept(new Success([
+            "items" : foundItems,
+            "totalRecords" : wrappedItems.getInteger("totalRecords")
+          ]))
         }
         else {
           failureCallback.accept(new Failure(responseBody, statusCode))
@@ -191,7 +195,8 @@ class ExternalStorageModuleItemCollection
         def statusCode = response.statusCode()
 
         if(statusCode == 200) {
-          def items = new JsonObject(responseBody).getJsonArray("items")
+          def wrappedItems = new JsonObject(responseBody)
+          def items = wrappedItems.getJsonArray("items")
 
           def foundItems = new ArrayList<Item>()
 
@@ -199,7 +204,10 @@ class ExternalStorageModuleItemCollection
             foundItems.add(mapFromJson(it))
           }
 
-          resultCallback.accept(new Success(["items" : foundItems]))
+          resultCallback.accept(new Success([
+            "items" : foundItems,
+            "totalRecords" : wrappedItems.getInteger("totalRecords")
+          ]))
         }
         else {
           failureCallback.accept(new Failure(responseBody, statusCode))

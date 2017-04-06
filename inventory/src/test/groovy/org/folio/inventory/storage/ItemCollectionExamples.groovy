@@ -56,11 +56,12 @@ abstract class ItemCollectionExamples {
     collection.findAll(PagingParameters.defaults(),
       succeed(findFuture), fail(findFuture))
 
-    def allItemsWrapped = getOnCompletion(findFuture)
+    def wrappedItems = getOnCompletion(findFuture)
 
-    def allItems = allItemsWrapped.items
+    def allItems = wrappedItems.items
 
     assert allItems.size() == 0
+    assert wrappedItems.totalRecords == 0
   }
 
   @Test
@@ -74,11 +75,12 @@ abstract class ItemCollectionExamples {
     collection.findAll(PagingParameters.defaults(), succeed(findFuture),
       fail(findFuture))
 
-    def allItemsWrapped = getOnCompletion(findFuture)
+    def wrappedItems = getOnCompletion(findFuture)
 
-    def allItems = allItemsWrapped.items
+    def allItems = wrappedItems.items
 
     assert allItems.size() == 3
+    assert wrappedItems.totalRecords == 3
 
     assert allItems.every { it.id != null }
     assert allItems.every { it.title != null }
@@ -220,11 +222,12 @@ abstract class ItemCollectionExamples {
     collection.findAll(PagingParameters.defaults(), succeed(findAllFuture),
       fail(findAllFuture))
 
-    def allItemsWrapped = getOnCompletion(findAllFuture)
+    def wrappedItems = getOnCompletion(findAllFuture)
 
-    def allItems = allItemsWrapped.items
+    def allItems = wrappedItems.items
 
     assert allItems.size() == 3
+    assert wrappedItems.totalRecords == 3
   }
 
   @Test
@@ -250,14 +253,14 @@ abstract class ItemCollectionExamples {
     collection.findAll(new PagingParameters(3, 3), succeed(secondPageFuture),
       fail(secondPageFuture))
 
-    def firstPageWrapped = getOnCompletion(firstPageFuture)
-    def secondPageWrapped = getOnCompletion(secondPageFuture)
+    def firstPage = getOnCompletion(firstPageFuture)
+    def secondPage = getOnCompletion(secondPageFuture)
 
-    def firstPageItems = firstPageWrapped.items
-    def secondPageItems = secondPageWrapped.items
+    assert firstPage.items.size() == 3
+    assert secondPage.items.size() == 2
 
-    assert firstPageItems.size() == 3
-    assert secondPageItems.size() == 2
+    assert firstPage.totalRecords == 5
+    assert secondPage.totalRecords == 5
   }
 
   @Test
@@ -287,12 +290,12 @@ abstract class ItemCollectionExamples {
     collection.findByCql("title=\"*Small Angry*\"", new PagingParameters(10, 0),
       succeed(findFuture), fail(findFuture))
 
-    def findByNameResultsWrapped = getOnCompletion(findFuture)
+    def wrappedItems = getOnCompletion(findFuture)
 
-    def findByNameResults = findByNameResultsWrapped.items
+    assert wrappedItems.items.size() == 1
+    assert wrappedItems.totalRecords == 1
 
-    assert findByNameResults.size() == 1
-    assert findByNameResults[0].id == addedSmallAngryPlanet.id
+    assert wrappedItems.items[0].id == addedSmallAngryPlanet.id
   }
 
   @Test
@@ -321,12 +324,12 @@ abstract class ItemCollectionExamples {
     collection.findByCql("barcode=036000291452", new PagingParameters(10, 0),
       succeed(findFuture), fail(findFuture))
 
-    def findByBarcodeResultsWrapped = getOnCompletion(findFuture)
+    def wrappedItems = getOnCompletion(findFuture)
 
-    def findByBarcodeResults = findByBarcodeResultsWrapped.items
+    assert wrappedItems.items.size() == 1
+    assert wrappedItems.totalRecords == 1
 
-    assert findByBarcodeResults.size() == 1
-    assert findByBarcodeResults[0].id == addedSmallAngryPlanet.id
+    assert wrappedItems.items[0].id == addedSmallAngryPlanet.id
   }
 
   @Test
