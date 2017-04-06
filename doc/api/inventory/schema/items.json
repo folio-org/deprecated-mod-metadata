@@ -62,6 +62,13 @@
           "instanceId"
         ]
       }
+    },
+    "totalRecords": {
+      "type": "integer"
     }
-  }
+  },
+  "required": [
+    "items",
+    "totalRecords"
+  ]
 }
