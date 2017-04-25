@@ -22,13 +22,14 @@ import java.util.concurrent.TimeUnit
   ModsIngestExamples.class
 ])
 
-public class ApiTestSuite {
+class ApiTestSuite {
   public static final INVENTORY_VERTICLE_TEST_PORT = 9603
   public static final String TENANT_ID = "test_tenant"
 
   private static final String TOKEN = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsInRlbmFudCI6ImRlbW9fdGVuYW50In0.29VPjLI6fLJzxQW0UhQ0jsvAn8xHz501zyXAxRflXfJ9wuDzT8TDf-V75PjzD7fe2kHjSV2dzRXbstt3BTtXIQ"
 
   private static String bookMaterialTypeId
+  private static String dvdMaterialTypeId
 
   private static VertxAssistant vertxAssistant = new VertxAssistant();
   private static String inventoryModuleDeploymentId
@@ -61,6 +62,10 @@ public class ApiTestSuite {
 
   static String getBookMaterialType() {
     bookMaterialTypeId
+  }
+
+  static String getDvdMaterialType() {
+    dvdMaterialTypeId
   }
 
   static HttpClient createHttpClient() {
@@ -154,22 +159,34 @@ public class ApiTestSuite {
 
     def existingMaterialTypes = wrappedMaterialTypes.mtypes
 
-    if(existingMaterialTypes.stream()
-      .noneMatch({ it.name == "Book" })) {
+    bookMaterialTypeId = createMaterialType(existingMaterialTypes, client,
+      materialTypesUrl, "Book")
+
+    dvdMaterialTypeId = createMaterialType(existingMaterialTypes, client,
+      materialTypesUrl, "DVD")
+  }
+
+  private static String createMaterialType(
+    existingMaterialTypes,
+    HttpClient client,
+    URL materialTypesUrl,
+    String materialTypeName) {
+
+    if (existingMaterialTypes.stream()
+      .noneMatch({ it.name == materialTypeName })) {
 
       def bookMaterialType = new JsonObject()
-        .put("name", "Book");
+        .put("name", materialTypeName);
 
       def (postResponse, createdMaterialType) = client.post(materialTypesUrl,
         Json.encodePrettily(bookMaterialType))
 
       assert postResponse.status == 201
 
-      bookMaterialTypeId = createdMaterialType.id
-    }
-    else {
-      bookMaterialTypeId = existingMaterialTypes.stream()
-        .filter({ it.name == "Book" })
+      createdMaterialType.id
+    } else {
+      existingMaterialTypes.stream()
+        .filter({ it.name == materialTypeName })
         .findFirst().get().id
     }
   }
