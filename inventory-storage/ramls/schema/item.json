@@ -25,6 +25,9 @@
     "materialTypeId": {
       "type": "string"
     },
+    "loanTypeId": {
+      "type": "string"
+    },
     "location": {
       "type": "object",
       "properties": {
