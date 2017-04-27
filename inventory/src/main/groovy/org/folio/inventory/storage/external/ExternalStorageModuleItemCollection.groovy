@@ -297,7 +297,7 @@ class ExternalStorageModuleItemCollection
     if(item?.materialType?.id != null) {
       itemToSend.put("materialTypeId", item.materialType.id.toString())
     }
-    
+ 
     itemToSend.put("location",
       new JsonObject().put("name", item.location))
     itemToSend

@@ -44,6 +44,20 @@
               "id"
             ]
           },
+          "loanType": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
           "location": {
             "type": "object",
             "properties": {
