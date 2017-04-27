@@ -10,6 +10,10 @@
     "id": "fcf3d3dc-b27f-4ce4-a530-542ea53cacb5",
     "name": "Book"
   },
+  "loanType": {
+    "id": "2b94c631-fca9-a892-c730-03ee529ffe27",
+    "name": "14 days"
+  },
   "location": {
     "name": "Main Library"
   }
